@@ -1,0 +1,5 @@
+app/config.php
+app/data/
+*.sqlite
+*.sqlite-*
+.DS_Store
