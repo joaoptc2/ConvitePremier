@@ -22,7 +22,7 @@ function event_defaults(): array
 }
 
 const PT_MONTHS = [1 => 'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
-const PT_WEEKDAYS_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+const PT_WEEKDAYS = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
 
 function event_date_obj(): DateTimeImmutable
 {
@@ -50,20 +50,11 @@ function event_time_range(): string
     return $end !== '' ? fmt_hour($start) . ' às ' . fmt_hour($end) : fmt_hour($start);
 }
 
-/** Dia anterior, dia do evento e dia seguinte para a faixa do calendário. */
-function event_day_strip(): array
+/** Ex.: "Sábado, 7 de novembro de 2026" */
+function event_date_full(): string
 {
     $d = event_date_obj();
-    $days = [];
-    foreach ([-1, 0, 1] as $offset) {
-        $day = $d->modify(($offset >= 0 ? '+' : '') . $offset . ' day');
-        $days[] = [
-            'weekday' => PT_WEEKDAYS_SHORT[(int)$day->format('w')],
-            'day' => (int)$day->format('j'),
-            'active' => $offset === 0,
-        ];
-    }
-    return $days;
+    return PT_WEEKDAYS[(int)$d->format('w')] . ', ' . (int)$d->format('j') . ' de ' . PT_MONTHS[(int)$d->format('n')] . ' de ' . $d->format('Y');
 }
 
 function rsvp_open(): bool
@@ -95,39 +86,6 @@ function headline_parts(string $treatment): array
         default:
             return ['Você é nosso', 'convidado', 'Você vem?'];
     }
-}
-
-function event_ics(): string
-{
-    $d = event_date_obj();
-    $start = (string)setting('time_start') ?: '00:00';
-    $end = (string)setting('time_end') ?: $start;
-    $tz = new DateTimeZone((string)config('timezone', 'America/Sao_Paulo'));
-    $dtStart = new DateTime($d->format('Y-m-d') . ' ' . $start, $tz);
-    $dtEnd = new DateTime($d->format('Y-m-d') . ' ' . $end, $tz);
-    $utc = new DateTimeZone('UTC');
-    $esc = static function (string $s): string {
-        return str_replace(["\\", ';', ',', "\n"], ["\\\\", '\;', '\,', '\n'], $s);
-    };
-    $location = trim(((string)setting('venue_name') !== '' ? setting('venue_name') . ' · ' : '') . setting('address'));
-    $lines = [
-        'BEGIN:VCALENDAR',
-        'VERSION:2.0',
-        'PRODID:-//Convite Premier//PT-BR',
-        'CALSCALE:GREGORIAN',
-        'METHOD:PUBLISH',
-        'BEGIN:VEVENT',
-        'UID:' . md5((string)config('base_url') . $d->format('Ymd')) . '@convite',
-        'DTSTAMP:' . gmdate('Ymd\THis\Z'),
-        'DTSTART:' . $dtStart->setTimezone($utc)->format('Ymd\THis\Z'),
-        'DTEND:' . $dtEnd->setTimezone($utc)->format('Ymd\THis\Z'),
-        'SUMMARY:' . $esc((string)setting('event_name')),
-        'LOCATION:' . $esc($location),
-        'DESCRIPTION:' . $esc((string)setting('tagline') . ' — Traje: ' . setting('dress_code')),
-        'END:VEVENT',
-        'END:VCALENDAR',
-    ];
-    return implode("\r\n", $lines) . "\r\n";
 }
 
 function google_calendar_link(): string

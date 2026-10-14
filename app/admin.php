@@ -10,6 +10,14 @@ header('Referrer-Policy: same-origin');
 
 if (!defined('ADMIN_PUBLIC')) {
     require_login();
+    if (empty($_SESSION['db_checked'])) {
+        try {
+            db_upgrade();
+        } catch (Throwable $e) {
+            // não impede o uso do painel
+        }
+        $_SESSION['db_checked'] = 1;
+    }
 }
 
 function admin_header(string $title, string $active = ''): void

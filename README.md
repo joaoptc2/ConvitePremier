@@ -6,11 +6,11 @@ Feito em PHP puro + MySQL para rodar em **hospedagem compartilhada da Hostinger*
 ## O que o sistema faz
 
 **Para o convidado**
-- Convite fiel ao modelo (logo, faixa de dias, data, horário, local, traje), otimizado para celular.
+- Convite no visual do modelo (logo, data, horário, local, traje), otimizado para celular.
 - Link único por pessoa (`seusite.com.br/c/Ab3xYz9kQe`) com saudação personalizada ("Olá, Maria").
 - Tratamento por convidado: *"Você é nosso convidado"*, *"Você é nossa convidada"* ou *"Vocês são nossos convidados"*.
 - Confirmar ou recusar, informar acompanhantes (até o limite definido para cada um) e deixar um recado.
-- Após confirmar: botão para salvar na agenda (Google ou arquivo .ics) e opção de alterar a resposta.
+- Após confirmar: botão para salvar na Agenda Google e opção de alterar a resposta.
 - Prazo de confirmação opcional. Depois dele, o convite não aceita respostas.
 - Prévia bonita do link no WhatsApp (imagem e título).
 
@@ -72,7 +72,6 @@ Editável em **Configurações**. Variáveis disponíveis:
 
 ```
 index.php          convite público (lê o código do link)
-ics.php            arquivo de agenda (.ics)
 install.php        instalador
 admin/             painel (lista, cadastro, importar, exportar, check-in, configurações)
 app/               código interno, bloqueado para acesso web

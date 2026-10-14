@@ -93,6 +93,7 @@ admin_header('Configurações', 'settings');
       </label>
       <label class="span-2">Endereço
         <input type="text" name="address" value="<?= e($v('address')) ?>" maxlength="255">
+        <small>No convite, cada “ · ” vira uma quebra de linha.</small>
       </label>
       <label class="span-2">Link do mapa
         <input type="url" name="map_url" value="<?= e($v('map_url')) ?>">

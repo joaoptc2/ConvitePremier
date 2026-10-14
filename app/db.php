@@ -129,3 +129,32 @@ function db_install_schema(PDO $pdo, string $driver): void
         }
     }
 }
+
+/**
+ * Ajustes automáticos em instalações existentes (roda uma vez por sessão do painel).
+ * - MySQL: garante utf8mb4 nas tabelas. Em utf8 "antigo" o MySQL grava emojis como "?".
+ * - Recupera a mensagem padrão do WhatsApp se ela foi salva com "?" no lugar dos emojis.
+ */
+function db_upgrade(): void
+{
+    if (config('db_driver', 'mysql') !== 'sqlite') {
+        $legacy = (int)db_value(
+            "SELECT COUNT(*) FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('guests', 'settings', 'activity')
+               AND CHARACTER_SET_NAME IS NOT NULL AND CHARACTER_SET_NAME <> 'utf8mb4'"
+        );
+        if ($legacy > 0) {
+            foreach (['guests', 'settings', 'activity', 'login_attempts'] as $table) {
+                db()->exec("ALTER TABLE {$table} CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+            }
+        }
+    }
+
+    $default = event_defaults()['whatsapp_message'];
+    $broken = preg_replace('/[\x{10000}-\x{10FFFF}]/u', '?', $default);
+    $current = (string)db_value("SELECT svalue FROM settings WHERE skey = 'whatsapp_message'");
+    $oldDefault = str_replace('queremos {voce} com a gente para celebrar', 'você é nosso convidado especial para celebrar', $broken);
+    if ($current !== '' && ($current === $broken || $current === $oldDefault)) {
+        setting_set('whatsapp_message', $default);
+    }
+}

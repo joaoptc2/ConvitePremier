@@ -36,12 +36,12 @@ $deadline = rsvp_deadline_text();
   <article class="card">
     <div class="card-inner">
       <header class="brand">
-        <img class="logo" src="<?= e(asset('assets/img/logo.png')) ?>" alt="Hospital Premier · 10 anos" width="224" height="69">
+        <img class="logo" src="<?= e(asset('assets/img/logo.png')) ?>" alt="Hospital Premier · 10 anos" width="250" height="77">
         <p class="tagline"><span><?= e(setting('tagline')) ?></span></p>
       </header>
 
       <?php if ($guest): ?>
-        <p class="greeting">Olá, <?= e($plural ? $guest['name'] : first_name($guest['name'])) ?></p>
+        <p class="greeting"><span>Olá,</span> <?= e($plural ? $guest['name'] : first_name($guest['name'])) ?></p>
       <?php endif; ?>
 
       <h1 class="headline">
@@ -49,36 +49,35 @@ $deadline = rsvp_deadline_text();
         <em class="h2"><?= e($guest ? $headline2 : 'convidado') ?></em>
       </h1>
 
-      <div class="days" aria-label="Data do evento">
-        <?php foreach (event_day_strip() as $day): ?>
-          <div class="day<?= $day['active'] ? ' is-active' : '' ?>">
-            <span class="wd"><?= e($day['weekday']) ?></span>
-            <span class="num"><?= (int)$day['day'] ?></span>
-            <?php if ($day['active']): ?>
-              <svg class="ring" viewBox="0 0 160 140" aria-hidden="true">
-                <ellipse cx="80" cy="72" rx="74" ry="62" transform="rotate(-6 80 72)"/>
-                <ellipse cx="78" cy="70" rx="70" ry="64" transform="rotate(4 78 70)"/>
-              </svg>
-            <?php endif; ?>
-          </div>
-        <?php endforeach; ?>
-      </div>
+      <div class="ornament" aria-hidden="true"><span></span></div>
 
       <dl class="details">
-        <div><dt>Data</dt><dd><?= e(event_date_long()) ?></dd></div>
-        <div><dt>Horário</dt><dd><?= e(event_time_range()) ?></dd></div>
-        <div>
+        <div class="detail">
+          <dt>Data</dt>
+          <dd class="big"><?= e(event_date_full()) ?></dd>
+        </div>
+        <div class="detail">
+          <dt>Horário</dt>
+          <dd class="big">Das <?= e(event_time_range()) ?></dd>
+        </div>
+        <div class="detail">
           <dt>Local</dt>
           <dd>
-            <?php if (setting('venue_name')): ?><strong class="venue"><?= e(setting('venue_name')) ?></strong><br><?php endif; ?>
-            <?= e(setting('address')) ?>
+            <?php if (setting('venue_name')): ?><strong class="venue"><?= e(setting('venue_name')) ?></strong><?php endif; ?>
+            <span class="address"><?= implode('<br>', array_map('e', preg_split('/\s+·\s+/u', (string)setting('address')))) ?></span>
             <?php if (setting('map_url')): ?>
-              <a class="map" href="<?= e(setting('map_url')) ?>" target="_blank" rel="noopener">Ver no mapa</a>
+              <a class="map" href="<?= e(setting('map_url')) ?>" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>
+                Ver no mapa
+              </a>
             <?php endif; ?>
           </dd>
         </div>
         <?php if (setting('dress_code')): ?>
-          <div><dt>Traje</dt><dd><?= e(setting('dress_code')) ?></dd></div>
+          <div class="detail">
+            <dt>Traje</dt>
+            <dd class="big"><?= e(setting('dress_code')) ?></dd>
+          </div>
         <?php endif; ?>
       </dl>
 
@@ -141,6 +140,9 @@ $deadline = rsvp_deadline_text();
 
         <?php elseif ($guest['status'] === 'confirmed'): ?>
           <div class="result">
+            <span class="seal" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></svg>
+            </span>
             <p class="question">Presença confirmada</p>
             <p class="note">
               Obrigado, <?= e(first_name($guest['response_name'] ?: $guest['name'])) ?>!
@@ -149,8 +151,7 @@ $deadline = rsvp_deadline_text();
                 <br><span class="small">Confirmado com <?= (int)$guest['companions'] ?> acompanhante<?= (int)$guest['companions'] > 1 ? 's' : '' ?>.</span>
               <?php endif; ?>
             </p>
-            <a class="btn btn-solid" href="<?= e(google_calendar_link()) ?>" target="_blank" rel="noopener">Salvar na agenda</a>
-            <a class="btn btn-outline" href="<?= e(base_path() . '/ics.php') ?>">Baixar evento (.ics)</a>
+            <a class="btn btn-outline" href="<?= e(google_calendar_link()) ?>" target="_blank" rel="noopener">Salvar na agenda</a>
             <?php if ($allowChange && rsvp_open()): ?>
               <a class="change" href="<?= e(self_link($guest['token'], 'editar=1')) ?>#resposta">Alterar resposta</a>
             <?php endif; ?>

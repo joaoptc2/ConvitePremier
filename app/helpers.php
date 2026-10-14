@@ -226,11 +226,14 @@ function invite_message(array $guest): string
 
 function whatsapp_link(array $guest): string
 {
+    // Usa api.whatsapp.com/send em vez de wa.me: o redirecionamento do wa.me
+    // corrompe emojis de 4 bytes (aparecem como "?" ou "�" na mensagem).
+    $params = ['text' => invite_message($guest)];
     $phone = normalize_phone($guest['phone'] ?? '');
-    $text = rawurlencode(invite_message($guest));
-    return $phone !== ''
-        ? "https://wa.me/{$phone}?text={$text}"
-        : "https://wa.me/?text={$text}";
+    if ($phone !== '') {
+        $params = ['phone' => $phone] + $params;
+    }
+    return 'https://api.whatsapp.com/send?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
 }
 
 function status_label(string $status): string
