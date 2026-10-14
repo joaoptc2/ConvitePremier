@@ -8,6 +8,7 @@ Feito em PHP puro + MySQL para rodar em **hospedagem compartilhada da Hostinger*
 **Para o convidado**
 - Convite no visual do modelo (logo, data, horário, local, traje), otimizado para celular.
 - Link único por pessoa (`seusite.com.br/c/Ab3xYz9kQe`) com saudação personalizada ("Olá, Maria").
+- Quem abre o site sem o link pessoal, ou com um link errado, vê só um aviso para usar o link recebido. Data, horário e local não aparecem.
 - Tratamento por convidado: *"Você é nosso convidado"*, *"Você é nossa convidada"* ou *"Vocês são nossos convidados"*.
 - Confirmar ou recusar, informar acompanhantes (até o limite definido para cada um) e deixar um recado.
 - Após confirmar: botão para salvar na Agenda Google e opção de alterar a resposta.

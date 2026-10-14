@@ -74,6 +74,10 @@ if ($guest && !is_post() && !$isAdminPreview) {
     }
 }
 
+if (!$guest && $token !== '') {
+    http_response_code(404);
+}
+
 $editing = $guest && isset($_GET['editar']) && $allowChange && rsvp_open();
 [$headline1, $headline2, $question] = headline_parts($guest['treatment'] ?? 'm');
 

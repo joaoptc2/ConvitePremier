@@ -239,6 +239,15 @@ body {
   background: var(--gold);
 }
 
+/* ---------- Acesso sem link válido ---------- */
+.restricted { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.restricted .ornament { margin: 30px auto 26px; }
+.restricted .seal { margin-bottom: 14px; }
+.restricted .question { margin-bottom: 14px; font-size: 32px; }
+.restricted .note { margin: 0 0 12px; max-width: 320px; }
+.restricted .note strong { color: var(--navy); font-weight: 600; }
+.restricted .note.small { margin-top: 10px; opacity: .85; }
+
 /* ---------- RSVP ---------- */
 .rsvp { text-align: center; scroll-margin-top: 24px; }
 
@@ -373,7 +382,7 @@ select.field {
   box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px var(--gold-soft);
 }
 
-.seal svg { width: 24px; height: 24px; fill: none; stroke: var(--gold); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.seal svg { width: 24px; height: 24px; fill: none; overflow: visible; stroke: var(--gold); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
 .change {
   margin-top: 8px;
@@ -393,7 +402,7 @@ select.field {
 }
 
 @media (max-width: 420px) {
-  .stage { padding: 14px 10px; align-items: flex-start; }
+  .stage { padding: 14px 10px; }
   .card { border-radius: 24px; padding: 10px; }
   .card-inner { padding: 36px 18px 28px; border-radius: 17px; }
   .greeting { font-size: 28px; }

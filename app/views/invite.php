@@ -4,7 +4,9 @@
 /** @var bool $editing */
 $eventName = (string)setting('event_name');
 $ogTitle = $guest ? 'Convite para ' . first_name($guest['name']) . ' · ' . $eventName : $eventName;
-$ogDesc = setting('tagline') . ' — ' . event_date_long() . ', ' . event_time_range() . '.';
+$ogDesc = $guest
+    ? setting('tagline') . ' — ' . event_date_long() . ', ' . event_time_range() . '.'
+    : 'Convite pessoal. Acesse pelo link exclusivo que você recebeu.';
 $hasAnswered = $guest && $guest['status'] !== 'pending';
 $showForm = $guest && rsvp_open() && (!$hasAnswered || $editing);
 $maxComp = $guest ? (int)$guest['max_companions'] : 0;
@@ -40,13 +42,28 @@ $deadline = rsvp_deadline_text();
         <p class="tagline"><span><?= e(setting('tagline')) ?></span></p>
       </header>
 
-      <?php if ($guest): ?>
-        <p class="greeting"><span>Olá,</span> <?= e($plural ? $guest['name'] : first_name($guest['name'])) ?></p>
-      <?php endif; ?>
+      <?php if (!$guest): ?>
+      <section class="restricted">
+        <div class="ornament" aria-hidden="true"><span></span></div>
+        <span class="seal" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+        </span>
+        <h1 class="question">Convite pessoal</h1>
+        <?php if ($token !== ''): ?>
+          <p class="note">Não encontramos este convite.<br>Confira se o link foi aberto por completo, exatamente como você recebeu.</p>
+        <?php else: ?>
+          <p class="note">Este convite é pessoal e intransferível.</p>
+        <?php endif; ?>
+        <p class="note">Para ver os detalhes e confirmar sua presença, acesse pelo <strong>link exclusivo</strong> que enviamos para você.</p>
+        <p class="note small">Não recebeu o link? Fale com a organização do evento.</p>
+      </section>
+      <?php else: ?>
+
+      <p class="greeting"><span>Olá,</span> <?= e($plural ? $guest['name'] : first_name($guest['name'])) ?></p>
 
       <h1 class="headline">
-        <span class="h1"><?= e($guest ? $headline1 : 'Você é nosso') ?></span>
-        <em class="h2"><?= e($guest ? $headline2 : 'convidado') ?></em>
+        <span class="h1"><?= e($headline1) ?></span>
+        <em class="h2"><?= e($headline2) ?></em>
       </h1>
 
       <div class="ornament" aria-hidden="true"><span></span></div>
@@ -88,14 +105,7 @@ $deadline = rsvp_deadline_text();
           <p class="alert"><?= e($error) ?></p>
         <?php endif; ?>
 
-        <?php if (!$guest): ?>
-          <p class="question">Convite pessoal</p>
-          <p class="note">
-            <?= $token !== '' ? 'Não encontramos este convite. Confira se o link foi copiado por completo.' : 'Este convite é pessoal e intransferível.' ?><br>
-            Para confirmar presença, use o link que você recebeu.
-          </p>
-
-        <?php elseif ($showForm): ?>
+        <?php if ($showForm): ?>
           <form method="post" action="" class="rsvp-form" autocomplete="on">
             <p class="question"><?= e($question) ?></p>
             <?php if ($deadline && !$hasAnswered): ?>
@@ -174,6 +184,7 @@ $deadline = rsvp_deadline_text();
           <p class="note">O prazo para confirmar presença terminou. Em caso de dúvida, fale com a organização do evento.</p>
         <?php endif; ?>
       </section>
+      <?php endif; ?>
     </div>
   </article>
 </main>
