@@ -17,6 +17,12 @@ function event_defaults(): array
         'rsvp_deadline' => '',
         'allow_change' => '1',
         'ask_message' => '1',
+        'photos_enabled' => '0',
+        'photos_seconds' => '20',
+        'review_url' => '',
+        'photos_title' => 'As fotos do evento chegaram!',
+        'photos_message' => 'Foi uma alegria celebrar os 10 anos do Hospital Premier com {voce}. Antes de ver suas fotos, deixe sua avaliação do hospital no Google. Leva menos de um minuto e faz toda a diferença para nós.',
+        'whatsapp_photos_message' => "Olá, {primeiro_nome}! 💙\n\nObrigado por celebrar os 10 anos do Hospital Premier com a gente. As fotos do evento já estão disponíveis!\n\n📸 Acesse pelo seu link:\n{link}",
         'whatsapp_message' => "Olá, {primeiro_nome}! 💙\n\nO Hospital Premier completa 10 anos e queremos {voce} com a gente para celebrar essa década de cuidado.\n\n📅 {data}\n🕐 {horario}\n\nAcesse seu convite e confirme sua presença:\n{link}",
     ];
 }

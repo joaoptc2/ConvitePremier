@@ -36,12 +36,13 @@ if (($q = trim((string)($_GET['q'] ?? ''))) !== '') {
     array_push($params, "%$q%", "%$q%", "%$q%", "%$q%");
 }
 $envio = (string)($_GET['envio'] ?? '');
+$sentCol = sent_column();
 if ($envio === 'nao') {
-    $where[] = 'sent_at IS NULL';
+    $where[] = "$sentCol IS NULL";
 } elseif ($envio === 'sim') {
-    $where[] = 'sent_at IS NOT NULL';
+    $where[] = "$sentCol IS NOT NULL";
 } elseif ($envio === 'naoviu') {
-    $where[] = 'sent_at IS NOT NULL AND first_viewed_at IS NULL';
+    $where[] = "$sentCol IS NOT NULL AND " . (photos_enabled() ? 'photos_opened_at' : 'first_viewed_at') . ' IS NULL';
 }
 
 $guests = db_all('SELECT * FROM guests' . ($where ? ' WHERE ' . implode(' AND ', $where) : '') . ' ORDER BY name', $params);
@@ -53,7 +54,8 @@ fwrite($out, "\xEF\xBB\xBF"); // BOM para o Excel reconhecer UTF-8
 $csv([
     'Nome', 'Tratamento', 'Telefone', 'E-mail', 'Grupo', 'Acompanhantes permitidos', 'Resposta', 'Total de pessoas',
     'Nome informado', 'Acompanhantes confirmados', 'Nomes dos acompanhantes', 'Recado', 'Respondido em',
-    'Enviado em', 'Visualizações', 'Primeira visualização', 'Check-in', 'Observações', 'Link',
+    'Enviado em', 'Visualizações', 'Primeira visualização', 'Check-in',
+    'Fotos: mensagem enviada em', 'Fotos: abriu em', 'Fotos: viu em', 'Clicou em avaliar em', 'Observações', 'Link',
 ]);
 foreach ($guests as $g) {
     $csv([
@@ -74,6 +76,10 @@ foreach ($guests as $g) {
         (int)$g['view_count'],
         $g['first_viewed_at'] ? fmt_datetime($g['first_viewed_at']) : '',
         $g['checked_in_at'] ? fmt_datetime($g['checked_in_at']) : '',
+        $g['photos_sent_at'] ? fmt_datetime($g['photos_sent_at']) : '',
+        $g['photos_opened_at'] ? fmt_datetime($g['photos_opened_at']) : '',
+        $g['photos_unlocked_at'] ? fmt_datetime($g['photos_unlocked_at']) : '',
+        $g['review_clicked_at'] ? fmt_datetime($g['review_clicked_at']) : '',
         $g['notes'],
         guest_link($g),
     ]);

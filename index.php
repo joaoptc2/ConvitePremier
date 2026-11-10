@@ -26,7 +26,7 @@ function self_link(string $token, string $extra = ''): string
 $error = null;
 $allowChange = setting('allow_change') === '1';
 
-if ($guest && is_post()) {
+if ($guest && is_post() && !photos_enabled()) {
     $action = $_POST['action'] ?? '';
     $alreadyAnswered = $guest['status'] !== 'pending';
 
@@ -72,6 +72,21 @@ if ($guest && !is_post() && !$isAdminPreview) {
     if ($isFirst) {
         log_activity((int)$guest['id'], 'viewed');
     }
+}
+
+// Modo fotos (pós-evento): o link pessoal abre a página de fotos
+if ($guest && photos_enabled()) {
+    if (!$isAdminPreview) {
+        if (empty($guest['photos_opened_at'])) {
+            log_activity((int)$guest['id'], 'photos_open');
+        }
+        db_query(
+            'UPDATE guests SET photos_opened_at = COALESCE(photos_opened_at, ?), photos_gate_at = ? WHERE id = ?',
+            [now(), now(), $guest['id']]
+        );
+    }
+    require APP_DIR . '/views/photos.php';
+    exit;
 }
 
 if (!$guest && $token !== '') {

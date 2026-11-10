@@ -91,6 +91,11 @@ function db_install_schema(PDO $pdo, string $driver): void
         last_viewed_at DATETIME NULL,
         view_count INT NOT NULL DEFAULT 0,
         checked_in_at DATETIME NULL,
+        photos_sent_at DATETIME NULL,
+        photos_opened_at DATETIME NULL,
+        photos_gate_at DATETIME NULL,
+        photos_unlocked_at DATETIME NULL,
+        review_clicked_at DATETIME NULL,
         created_at DATETIME NOT NULL,
         updated_at DATETIME NOT NULL
     )$tail");
@@ -106,6 +111,16 @@ function db_install_schema(PDO $pdo, string $driver): void
         action VARCHAR(20) NOT NULL,
         detail VARCHAR(255) NULL,
         ip VARCHAR(45) NULL,
+        created_at DATETIME NOT NULL
+    )$tail");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS photos (
+        id $id,
+        file VARCHAR(80) NOT NULL,
+        original_name VARCHAR(190) NULL,
+        width INT NOT NULL DEFAULT 0,
+        height INT NOT NULL DEFAULT 0,
+        bytes INT NOT NULL DEFAULT 0,
         created_at DATETIME NOT NULL
     )$tail");
 
@@ -135,8 +150,35 @@ function db_install_schema(PDO $pdo, string $driver): void
  * - MySQL: garante utf8mb4 nas tabelas. Em utf8 "antigo" o MySQL grava emojis como "?".
  * - Recupera a mensagem padrão do WhatsApp se ela foi salva com "?" no lugar dos emojis.
  */
+function db_column_exists(string $table, string $column): bool
+{
+    if (config('db_driver', 'mysql') === 'sqlite') {
+        foreach (db_all("PRAGMA table_info($table)") as $col) {
+            if ($col['name'] === $column) {
+                return true;
+            }
+        }
+        return false;
+    }
+    return (int)db_value(
+        'SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?',
+        [$table, $column]
+    ) > 0;
+}
+
+/** Versão do esquema. Aumente quando adicionar colunas/tabelas em db_upgrade(). */
+const DB_VERSION = 2;
+
 function db_upgrade(): void
 {
+    // v2: galeria de fotos
+    db_install_schema(db(), (string)config('db_driver', 'mysql'));
+    foreach (['photos_sent_at', 'photos_opened_at', 'photos_gate_at', 'photos_unlocked_at', 'review_clicked_at'] as $col) {
+        if (!db_column_exists('guests', $col)) {
+            db()->exec("ALTER TABLE guests ADD COLUMN $col DATETIME NULL");
+        }
+    }
+
     if (config('db_driver', 'mysql') !== 'sqlite') {
         $legacy = (int)db_value(
             "SELECT COUNT(*) FROM information_schema.COLUMNS
@@ -144,7 +186,7 @@ function db_upgrade(): void
                AND CHARACTER_SET_NAME IS NOT NULL AND CHARACTER_SET_NAME <> 'utf8mb4'"
         );
         if ($legacy > 0) {
-            foreach (['guests', 'settings', 'activity', 'login_attempts'] as $table) {
+            foreach (['guests', 'settings', 'activity', 'login_attempts', 'photos'] as $table) {
                 db()->exec("ALTER TABLE {$table} CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
             }
         }

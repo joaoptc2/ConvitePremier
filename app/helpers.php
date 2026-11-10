@@ -211,7 +211,7 @@ function first_name(string $name): string
 
 function invite_message(array $guest): string
 {
-    $tpl = (string)setting('whatsapp_message');
+    $tpl = (string)setting(function_exists('photos_enabled') && photos_enabled() ? 'whatsapp_photos_message' : 'whatsapp_message');
     $t = $guest['treatment'] ?? 'm';
     return strtr($tpl, [
         '{voce}' => $t === 'p' ? 'vocês' : 'você',
@@ -280,13 +280,14 @@ function guest_people(array $g): int
 
 function guest_stats(): array
 {
+    $sent = function_exists('sent_column') ? sent_column() : 'sent_at';
     $row = db_row("SELECT
         COUNT(*) AS total,
         SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) AS confirmed,
         SUM(CASE WHEN status = 'declined' THEN 1 ELSE 0 END) AS declined,
         SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,
         SUM(CASE WHEN status = 'confirmed' THEN 1 + companions ELSE 0 END) AS people,
-        SUM(CASE WHEN sent_at IS NOT NULL THEN 1 ELSE 0 END) AS sent,
+        SUM(CASE WHEN $sent IS NOT NULL THEN 1 ELSE 0 END) AS sent,
         SUM(CASE WHEN first_viewed_at IS NOT NULL THEN 1 ELSE 0 END) AS viewed,
         SUM(CASE WHEN checked_in_at IS NOT NULL THEN 1 ELSE 0 END) AS checked_in,
         SUM(1 + max_companions) AS capacity

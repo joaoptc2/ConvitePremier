@@ -27,6 +27,20 @@ Feito em PHP puro + MySQL para rodar em **hospedagem compartilhada da Hostinger*
 - Configurações do evento e da mensagem do WhatsApp editáveis pelo painel.
 - Atividade recente: quem abriu, confirmou ou recusou.
 
+## Fotos do evento (pós-evento)
+
+No menu **Fotos** do painel:
+
+1. **Envie as fotos.** Arraste para a área de envio. Aceita JPG, PNG e WebP. Cada foto gera uma versão para tela e uma miniatura, e a original fica disponível para download.
+2. **Cole o link de avaliação do Google.** Ele fica no Perfil da Empresa do hospital, em "Pedir avaliações".
+3. **Ative o modo fotos.** A partir daí, o link pessoal de cada convidado abre a página de fotos no lugar do convite.
+
+Na página de fotos, o convidado vê a mensagem, o botão "Avaliar no Google" e uma contagem regressiva (20 segundos por padrão). Ao fim da contagem, ele libera a galeria, amplia as fotos e baixa cada uma. Quem já liberou não espera de novo. O tempo de espera também é conferido no servidor.
+
+Enquanto o modo fotos está ativo, o botão WhatsApp da lista envia a mensagem das fotos, e a coluna Envio passa a mostrar o envio dessa mensagem. O painel mostra quem abriu a página, quem viu as fotos e quem clicou em avaliar. Desative o modo fotos para os links voltarem a mostrar o convite.
+
+> O Google proíbe oferecer qualquer benefício em troca de avaliações. Por isso o texto padrão convida a avaliar sem dizer que a avaliação é obrigatória, e o site não verifica se a pessoa avaliou. Todos os textos podem ser editados no painel.
+
 ## Instalação na Hostinger
 
 1. **Crie o banco MySQL.** No hPanel, vá em *Bancos de dados → Gerenciamento* e crie um banco e um usuário. Anote o nome do banco, o usuário e a senha.
@@ -73,12 +87,14 @@ Editável em **Configurações**. Variáveis disponíveis:
 
 ```
 index.php          convite público (lê o código do link)
+fotos.php          libera a galeria e registra o clique em avaliar
 install.php        instalador
 admin/             painel (lista, cadastro, importar, exportar, check-in, configurações)
 app/               código interno, bloqueado para acesso web
   config.php       criado pelo instalador (não vai para o Git)
   views/invite.php layout do convite
 assets/            CSS, JS e imagens (logo, ícone, imagem de prévia)
+uploads/fotos/     fotos enviadas pelo painel (não vão para o Git)
 ```
 
 ## Segurança

@@ -20,10 +20,11 @@ if (!$guest) {
 
 switch ($_POST['action'] ?? '') {
     case 'mark_sent':
-        if (!$guest['sent_at']) {
-            db_query('UPDATE guests SET sent_at = ?, updated_at = ? WHERE id = ?', [now(), now(), $id]);
+        $col = sent_column();
+        if (!$guest[$col]) {
+            db_query("UPDATE guests SET $col = ?, updated_at = ? WHERE id = ?", [now(), now(), $id]);
         }
-        echo json_encode(['ok' => true, 'sent_at' => fmt_datetime($guest['sent_at'] ?: now())]);
+        echo json_encode(['ok' => true, 'sent_at' => fmt_datetime($guest[$col] ?: now())]);
         break;
 
     case 'toggle_checkin':

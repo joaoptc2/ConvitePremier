@@ -12,13 +12,14 @@ if (is_post()) {
         flash('Selecione ao menos um convidado.', 'error');
     } else {
         $in = implode(',', array_fill(0, count($ids), '?'));
+        $col = sent_column();
         switch ($bulk) {
             case 'sent':
-                db_query("UPDATE guests SET sent_at = COALESCE(sent_at, ?), updated_at = ? WHERE id IN ($in)", array_merge([now(), now()], $ids));
+                db_query("UPDATE guests SET $col = COALESCE($col, ?), updated_at = ? WHERE id IN ($in)", array_merge([now(), now()], $ids));
                 flash(count($ids) . ' convite(s) marcados como enviados.');
                 break;
             case 'unsent':
-                db_query("UPDATE guests SET sent_at = NULL, updated_at = ? WHERE id IN ($in)", array_merge([now()], $ids));
+                db_query("UPDATE guests SET $col = NULL, updated_at = ? WHERE id IN ($in)", array_merge([now()], $ids));
                 flash(count($ids) . ' convite(s) marcados como não enviados.');
                 break;
             case 'reset':
@@ -59,12 +60,14 @@ if ($group !== '') {
     $where[] = 'group_name = ?';
     $params[] = $group;
 }
+$sentCol = sent_column();
+$photosMode = photos_enabled();
 if ($sent === 'nao') {
-    $where[] = 'sent_at IS NULL';
+    $where[] = "$sentCol IS NULL";
 } elseif ($sent === 'sim') {
-    $where[] = 'sent_at IS NOT NULL';
+    $where[] = "$sentCol IS NOT NULL";
 } elseif ($sent === 'naoviu') {
-    $where[] = 'sent_at IS NOT NULL AND first_viewed_at IS NULL';
+    $where[] = "$sentCol IS NOT NULL AND " . ($photosMode ? 'photos_opened_at' : 'first_viewed_at') . ' IS NULL';
 }
 $orderBy = [
     'nome' => 'name ASC',
@@ -85,6 +88,9 @@ $activityText = [
     'declined' => 'informou que não poderá ir',
     'manual' => 'teve a resposta alterada pela equipe',
     'checkin' => 'fez check-in',
+    'photos_open' => 'abriu a página de fotos',
+    'photos' => 'viu as fotos',
+    'review' => 'clicou em avaliar no Google',
 ];
 
 $answered = $stats['confirmed'] + $stats['declined'];
@@ -92,6 +98,9 @@ $pct = $stats['total'] > 0 ? round($answered / $stats['total'] * 100) : 0;
 
 admin_header('Convidados', 'index');
 ?>
+<?php if ($photosMode): ?>
+  <div class="flash">Modo fotos ativo: os links abrem a página de fotos e o botão WhatsApp envia a mensagem das fotos. A coluna Envio mostra o envio dessa mensagem. <a class="link" href="photos.php">Gerenciar fotos</a></div>
+<?php endif; ?>
 <section class="stats">
   <div class="stat"><span class="stat-num"><?= $stats['total'] ?></span><span class="stat-label">Convidados</span></div>
   <div class="stat stat-ok"><span class="stat-num"><?= $stats['people'] ?></span><span class="stat-label">Pessoas confirmadas</span><small><?= $stats['confirmed'] ?> convite(s)</small></div>
@@ -203,13 +212,18 @@ admin_header('Convidados', 'index');
                 <?php if ($g['message']): ?><div class="msg" title="<?= e($g['message']) ?>">“<?= e(mb_strimwidth($g['message'], 0, 60, '…')) ?>”</div><?php endif; ?>
               </td>
               <td class="c-sent">
-                <?php if ($g['sent_at']): ?>
+                <?php if ($g[$sentCol]): ?>
                   <span class="dot dot-ok" data-sent-label>Enviado</span>
                 <?php else: ?>
                   <span class="dot" data-sent-label>Não enviado</span>
                 <?php endif; ?>
                 <div class="meta">
-                  <?= (int)$g['view_count'] > 0 ? 'Aberto ' . (int)$g['view_count'] . 'x' : 'Não aberto' ?>
+                  <?php if ($photosMode): ?>
+                    <?= $g['photos_unlocked_at'] ? 'Viu as fotos' : ($g['photos_opened_at'] ? 'Abriu, não liberou' : 'Fotos não abertas') ?>
+                    <?php if ($g['review_clicked_at']): ?><span class="chip">Clicou em avaliar</span><?php endif; ?>
+                  <?php else: ?>
+                    <?= (int)$g['view_count'] > 0 ? 'Aberto ' . (int)$g['view_count'] . 'x' : 'Não aberto' ?>
+                  <?php endif; ?>
                 </div>
               </td>
               <td class="c-actions">

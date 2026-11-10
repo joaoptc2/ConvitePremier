@@ -18,3 +18,4 @@ mb_internal_encoding('UTF-8');
 require APP_DIR . '/db.php';
 require APP_DIR . '/helpers.php';
 require APP_DIR . '/event.php';
+require APP_DIR . '/photos.php';

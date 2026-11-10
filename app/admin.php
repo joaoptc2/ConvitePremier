@@ -10,13 +10,13 @@ header('Referrer-Policy: same-origin');
 
 if (!defined('ADMIN_PUBLIC')) {
     require_login();
-    if (empty($_SESSION['db_checked'])) {
+    if (($_SESSION['db_checked'] ?? 0) !== DB_VERSION) {
         try {
             db_upgrade();
+            $_SESSION['db_checked'] = DB_VERSION;
         } catch (Throwable $e) {
-            // não impede o uso do painel
+            flash('Não foi possível atualizar o banco de dados: ' . $e->getMessage(), 'error');
         }
-        $_SESSION['db_checked'] = 1;
     }
 }
 
@@ -26,6 +26,7 @@ function admin_header(string $title, string $active = ''): void
         'index' => ['index.php', 'Convidados'],
         'import' => ['import.php', 'Importar'],
         'checkin' => ['checkin.php', 'Check-in'],
+        'photos' => ['photos.php', 'Fotos'],
         'settings' => ['settings.php', 'Configurações'],
     ];
     ?><!doctype html>

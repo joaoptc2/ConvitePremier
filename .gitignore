@@ -3,3 +3,4 @@ app/data/
 *.sqlite
 *.sqlite-*
 .DS_Store
+uploads/fotos/

@@ -185,9 +185,14 @@ admin_header($guest ? $guest['name'] : 'Novo convidado', 'index');
         <dt>Nome informado</dt><dd><?= e($guest['response_name']) ?></dd>
       <?php endif; ?>
       <dt>Respondido em</dt><dd><?= e(fmt_datetime($guest['responded_at'])) ?></dd>
-      <dt>Enviado em</dt><dd data-sent-label><?= e(fmt_datetime($guest['sent_at'])) ?></dd>
+      <dt>Enviado em</dt><dd<?= sent_column() === 'sent_at' ? ' data-sent-label' : '' ?>><?= e(fmt_datetime($guest['sent_at'])) ?></dd>
       <dt>Aberto</dt><dd><?= (int)$guest['view_count'] ?>x <?= $guest['first_viewed_at'] ? '· 1ª vez ' . e(fmt_datetime($guest['first_viewed_at'])) : '' ?></dd>
       <dt>Check-in</dt><dd><?= e(fmt_datetime($guest['checked_in_at'])) ?></dd>
+      <?php if ($guest['photos_sent_at'] || $guest['photos_opened_at'] || photos_enabled()): ?>
+        <dt>Fotos enviadas</dt><dd<?= sent_column() === 'photos_sent_at' ? ' data-sent-label' : '' ?>><?= e(fmt_datetime($guest['photos_sent_at'])) ?></dd>
+        <dt>Viu as fotos</dt><dd><?= e(fmt_datetime($guest['photos_unlocked_at'])) ?></dd>
+        <dt>Clicou em avaliar</dt><dd><?= e(fmt_datetime($guest['review_clicked_at'])) ?></dd>
+      <?php endif; ?>
       <?php if ($guest['message']): ?>
         <dt>Recado</dt><dd class="quote"><?= nl2br(e($guest['message'])) ?></dd>
       <?php endif; ?>
